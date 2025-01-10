@@ -904,3 +904,14 @@ func SaveTemplate(tpl *SpdfTemplate, filename string) error {
 
 	return nil
 }
+
+// LoadTemplateFromBytes loads a template from a byte slice and returns a pointer to the template
+func LoadTemplateFromBytes(data []byte) (*SpdfTemplate, error) {
+	tpl := &SpdfTemplate{}
+	err := json.Unmarshal(data, tpl)
+	if err != nil {
+		return nil, err
+	}
+
+	return tpl, nil
+}
