@@ -113,14 +113,15 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 
 	// create pdf
 	pdf := fpdf.New("P", "mm", "A4", "")
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	// pdf.SetProtection(0, "", "abc")
 
 	// set title and author
-	pdf.SetTitle(tpl.RenderPdfTitle(), true)
-	pdf.SetSubject(tpl.RenderPdfSubject(), true)
-	pdf.SetKeywords(tpl.RenderPdfKeywords(), true)
+	pdf.SetTitle(tr(tpl.RenderPdfTitle()), true)
+	pdf.SetSubject(tr(tpl.RenderPdfSubject()), true)
+	pdf.SetKeywords(tr(tpl.RenderPdfKeywords()), true)
 
-	pdf.SetAuthor(tpl.Author, true)
+	pdf.SetAuthor(tr(tpl.Author), true)
 
 	// creator and producer
 	pdf.SetCreator("smartest.software pdf renderer", true)
@@ -155,6 +156,7 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 						values[i] = v
 					}
 					text := fmt.Sprintf(item.Data, values...)
+					trText := tr(text)
 
 					// Get position (x, y)
 					var x, y float64
@@ -249,7 +251,7 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 						w = pageWidth - left - right
 
 					} else {
-						w = pdf.GetStringWidth(text)
+						w = pdf.GetStringWidth(trText)
 					}
 					if item.Params["h"] != "" {
 						h, err = strconv.ParseFloat(item.Params["h"], 64)
@@ -324,7 +326,7 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 					// Apply rotation if needed
 					if rotation != 0 {
 						// Calculate text width and height for rotation pivot
-						textWidth := pdf.GetStringWidth(text)
+						textWidth := pdf.GetStringWidth(trText)
 						if item.Params["w"] != "auto" && w > 0 {
 							textWidth = w
 						}
@@ -344,7 +346,7 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 					}
 
 					// Output text with specified width, height, and border
-					pdf.CellFormat(w, h, text, border, 0, alignStr, enableBgFill, 0, "")
+					pdf.CellFormat(w, h, trText, border, 0, alignStr, enableBgFill, 0, "")
 
 					// Reset rotation
 					if rotation != 0 {
@@ -430,7 +432,7 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 					}
 
 					// write text with automatic line breaks
-					pdf.Write(h, text)
+					pdf.Write(h, trText)
 
 				} else if item.Type == "image" {
 
