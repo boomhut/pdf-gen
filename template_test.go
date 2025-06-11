@@ -161,3 +161,36 @@ func TestMustReturnPtrFpdf(t *testing.T) {
 	}()
 	MustReturnPtrFpdf(pdf, errors.New("fail"))
 }
+
+func TestRenderToFileWithFonts(t *testing.T) {
+	// setup fonts directory expected by LoadFonts
+	if err := os.MkdirAll("resources/fonts", 0o755); err != nil {
+		t.Fatalf("mkdir fonts: %v", err)
+	}
+	if err := os.WriteFile("resources/fonts/fonts.json", []byte("[]"), 0o644); err != nil {
+		t.Fatalf("write fonts.json: %v", err)
+	}
+	t.Cleanup(func() {
+		os.RemoveAll("resources")
+	})
+
+	tpl := NewTemplate("font-test")
+	tpl.AddPage(210, 297)
+	tpl.AddLayer("layer", SpdfMargin{})
+
+	tpl.AddItem(SpdfItem{Type: "text", Data: "Héllo ñ", Params: map[string]string{"font": "Courier", "size": "12", "x": "10", "y": "10"}})
+	tpl.AddItem(SpdfItem{Type: "text", Data: "Ünicode", Params: map[string]string{"font": "Helvetica", "size": "14", "x": "10", "y": "20"}})
+	tpl.AddItem(SpdfItem{Type: "text", Data: "Čau", Params: map[string]string{"font": "Times", "size": "16", "x": "10", "y": "30"}})
+
+	out := filepath.Join(t.TempDir(), "out.pdf")
+	if err := tpl.RenderToFile(out); err != nil {
+		t.Fatalf("RenderToFile error: %v", err)
+	}
+	info, err := os.Stat(out)
+	if err != nil {
+		t.Fatalf("stat pdf: %v", err)
+	}
+	if info.Size() == 0 {
+		t.Errorf("pdf file is empty")
+	}
+}
