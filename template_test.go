@@ -1,0 +1,163 @@
+package pdfgen
+
+import (
+	"encoding/json"
+	"errors"
+	"os"
+	"path/filepath"
+	"reflect"
+	"testing"
+
+	"github.com/go-pdf/fpdf"
+)
+
+func TestRenderPdfTitle(t *testing.T) {
+	tpl := &SpdfTemplate{Title: SpdfTitle{Data: "Hello %s %s", Values: []string{"John", "Doe"}}}
+	if got := tpl.RenderPdfTitle(); got != "Hello John Doe" {
+		t.Errorf("expected 'Hello John Doe', got %s", got)
+	}
+}
+
+func TestRenderPdfSubject(t *testing.T) {
+	tpl := &SpdfTemplate{Subject: SpdfSubject{Data: "Subject %s", Values: []string{"One"}}}
+	if got := tpl.RenderPdfSubject(); got != "Subject One" {
+		t.Errorf("expected 'Subject One', got %s", got)
+	}
+}
+
+func TestRenderPdfKeywords(t *testing.T) {
+	tpl := &SpdfTemplate{Keywords: SpdfKeywords{Data: "K %s %s", Values: []string{"A", "B"}}}
+	if got := tpl.RenderPdfKeywords(); got != "K A B" {
+		t.Errorf("expected 'K A B', got %s", got)
+	}
+}
+
+func TestAddPageLayerItem(t *testing.T) {
+	tpl := NewTemplate("test")
+	tpl.AddPage(100, 200)
+	tpl.AddLayer("layer", SpdfMargin{Top: 1, Right: 2, Bottom: 3, Left: 4})
+	tpl.AddItem(SpdfItem{Type: "text", Data: "hello"})
+
+	if len(tpl.Pages) != 1 {
+		t.Fatalf("expected 1 page, got %d", len(tpl.Pages))
+	}
+	page := tpl.Pages[0]
+	if page.Width != 100 || page.Height != 200 {
+		t.Errorf("unexpected page size: %+v", page)
+	}
+	if len(page.Layers) != 1 {
+		t.Fatalf("expected 1 layer, got %d", len(page.Layers))
+	}
+	layer := page.Layers[0]
+	if layer.Margin.Left != 4 {
+		t.Errorf("unexpected margin: %+v", layer.Margin)
+	}
+	if len(layer.Items) != 1 {
+		t.Fatalf("expected 1 item, got %d", len(layer.Items))
+	}
+	if layer.Items[0].Data != "hello" {
+		t.Errorf("unexpected item: %+v", layer.Items[0])
+	}
+}
+
+func TestAddDataBinding(t *testing.T) {
+	tpl := NewTemplate("d")
+	tpl.AddDataBinding("k", "v", func(key string) interface{} { return "v" })
+	if len(tpl.DataBinding) != 1 {
+		t.Fatalf("expected 1 binding, got %d", len(tpl.DataBinding))
+	}
+	if tpl.DataBinding[0].Key != "k" {
+		t.Errorf("unexpected key: %s", tpl.DataBinding[0].Key)
+	}
+}
+
+func TestNperPage(t *testing.T) {
+	items := []SpdfItem{{}, {}, {}, {}, {}}
+	pages := NperPage(items, 2)
+	if len(pages) != 3 {
+		t.Fatalf("expected 3 pages, got %d", len(pages))
+	}
+	if len(pages[0]) != 2 || len(pages[2]) != 1 {
+		t.Errorf("unexpected split result: %+v", pages)
+	}
+}
+
+func TestCalcResize(t *testing.T) {
+	w, h := CalcResize(200, 100, 100, 80)
+	if w != 100 || h != 50 {
+		t.Errorf("unexpected size %d x %d", w, h)
+	}
+}
+
+func TestCalcResizeFromRatio(t *testing.T) {
+	w, h := CalcResizeFromRatio(100, 100, 2, 50)
+	if w != 50 || h != 100 {
+		t.Errorf("unexpected size %d x %d", w, h)
+	}
+}
+
+func TestCalcResizeFromWidth(t *testing.T) {
+	w, h := CalcResizeFromWidth(200, 100, 50)
+	if w != 50 || h != 25 {
+		t.Errorf("unexpected size %d x %d", w, h)
+	}
+}
+
+func TestSaveAndLoadTemplate(t *testing.T) {
+	tpl := NewTemplate("a")
+	file := t.TempFile()
+	if err := SaveTemplate(tpl, file.Name()); err != nil {
+		t.Fatalf("SaveTemplate error: %v", err)
+	}
+	loaded, err := LoadTemplate(file.Name())
+	if err != nil {
+		t.Fatalf("LoadTemplate error: %v", err)
+	}
+	if !reflect.DeepEqual(tpl, loaded) {
+		t.Errorf("templates not equal: %+v vs %+v", tpl, loaded)
+	}
+}
+
+func TestLoadTemplateFromBytes(t *testing.T) {
+	tpl := NewTemplate("b")
+	data, err := json.Marshal(tpl)
+	if err != nil {
+		t.Fatalf("marshal error: %v", err)
+	}
+	loaded, err := LoadTemplateFromBytes(data)
+	if err != nil {
+		t.Fatalf("LoadTemplateFromBytes error: %v", err)
+	}
+	if !reflect.DeepEqual(tpl, loaded) {
+		t.Errorf("templates not equal: %+v vs %+v", tpl, loaded)
+	}
+}
+
+func TestListFonts(t *testing.T) {
+	dir := t.TempDir()
+	fontsJSON := `[{"Name":"A","Path":"a.json"},{"Name":"B","Path":"b.json"}]`
+	if err := os.WriteFile(filepath.Join(dir, "fonts.json"), []byte(fontsJSON), 0o644); err != nil {
+		t.Fatalf("write fonts.json: %v", err)
+	}
+	fonts, err := ListFonts(dir)
+	if err != nil {
+		t.Fatalf("ListFonts error: %v", err)
+	}
+	expected := []string{"A", "B"}
+	if !reflect.DeepEqual(fonts, expected) {
+		t.Errorf("expected %v, got %v", expected, fonts)
+	}
+}
+
+func TestMustReturnPtrFpdf(t *testing.T) {
+	pdf := &fpdf.Fpdf{}
+	if MustReturnPtrFpdf(pdf, nil) != pdf {
+		t.Errorf("did not return input pointer")
+	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected panic")
+		}
+	}()
+	MustReturnPtrFpdf(pdf, errors.New("fail"))
+}
