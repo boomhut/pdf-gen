@@ -373,6 +373,7 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 						values[i] = v
 					}
 					text := fmt.Sprintf(item.Data, values...)
+					trText := tr(text)
 
 					// Get position (x, y)
 					var x, y float64
