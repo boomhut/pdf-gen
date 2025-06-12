@@ -176,9 +176,8 @@ func TestRenderToFileWithFonts(t *testing.T) {
 	if err := os.WriteFile("resources/fonts/fonts.json", []byte("[]"), 0o644); err != nil {
 		t.Fatalf("write fonts.json: %v", err)
 	}
-	t.Cleanup(func() {
-		os.RemoveAll("resources")
-	})
+	// Keep the resources directory so the generated PDF and fonts remain
+	// available after tests for manual inspection.
 
 	tpl := NewTemplate("font-test")
 	tpl.AddPage(210, 297)
@@ -188,7 +187,9 @@ func TestRenderToFileWithFonts(t *testing.T) {
 	tpl.AddItem(SpdfItem{Type: "text", Data: "Ünicode", Params: map[string]string{"font": "Helvetica", "size": "14", "x": "10", "y": "20"}})
 	tpl.AddItem(SpdfItem{Type: "text", Data: "Čau", Params: map[string]string{"font": "Times", "size": "16", "x": "10", "y": "30"}})
 
-	out := filepath.Join(t.TempDir(), "demo.pdf")
+	// Write the output to a persistent file so it can be inspected after the
+	// tests run.
+	out := "demo.pdf"
 	if err := tpl.RenderToFile(out); err != nil {
 		t.Fatalf("RenderToFile error: %v", err)
 	}
