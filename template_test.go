@@ -105,7 +105,13 @@ func TestCalcResizeFromWidth(t *testing.T) {
 
 func TestSaveAndLoadTemplate(t *testing.T) {
 	tpl := NewTemplate("a")
-	file := t.TempFile()
+	tmpdir := t.TempDir()
+	file, err := os.CreateTemp(tmpdir, "tmpl-*.json")
+	if err != nil {
+		t.Fatalf("CreateTemp error: %v", err)
+	}
+	defer os.Remove(file.Name())
+	defer file.Close()
 	if err := SaveTemplate(tpl, file.Name()); err != nil {
 		t.Fatalf("SaveTemplate error: %v", err)
 	}
@@ -182,7 +188,7 @@ func TestRenderToFileWithFonts(t *testing.T) {
 	tpl.AddItem(SpdfItem{Type: "text", Data: "Ünicode", Params: map[string]string{"font": "Helvetica", "size": "14", "x": "10", "y": "20"}})
 	tpl.AddItem(SpdfItem{Type: "text", Data: "Čau", Params: map[string]string{"font": "Times", "size": "16", "x": "10", "y": "30"}})
 
-	out := filepath.Join(t.TempDir(), "out.pdf")
+	out := filepath.Join(t.TempDir(), "demo.pdf")
 	if err := tpl.RenderToFile(out); err != nil {
 		t.Fatalf("RenderToFile error: %v", err)
 	}
@@ -193,4 +199,5 @@ func TestRenderToFileWithFonts(t *testing.T) {
 	if info.Size() == 0 {
 		t.Errorf("pdf file is empty")
 	}
+	t.Logf("demo PDF generated: %s", out)
 }
