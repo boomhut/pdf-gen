@@ -85,3 +85,144 @@ The package exposes helpers such as:
 * `ListFonts` – read the list of fonts from a directory.
 
 For more usage examples see the unit tests in `template_test.go`.
+
+## Examples
+
+### Article PDF
+
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/boomhut/pdf-gen"
+)
+
+func main() {
+    tpl := pdfgen.NewTemplate("article")
+    tpl.Title = pdfgen.SpdfTitle{Data: "My Article"}
+    tpl.AddPage(210, 297)
+    tpl.AddLayer("content", pdfgen.SpdfMargin{})
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Article headline",
+        Params: map[string]string{
+            "font": "Helvetica",
+            "size": "24",
+            "x":    "10",
+            "y":    "20",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "ftext",
+        Data: "Long article body...",
+        Params: map[string]string{
+            "font": "Helvetica",
+            "size": "12",
+            "x":    "10",
+            "y":    "40",
+            "w":    "auto",
+            "h":    "10",
+        },
+    })
+
+    if err := tpl.RenderToFile("article.pdf"); err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+### Invoice PDF
+
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/boomhut/pdf-gen"
+)
+
+func main() {
+    tpl := pdfgen.NewTemplate("invoice")
+    tpl.Title = pdfgen.SpdfTitle{Data: "Invoice"}
+    tpl.AddPage(210, 297)
+    tpl.AddLayer("content", pdfgen.SpdfMargin{})
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Invoice #001",
+        Params: map[string]string{
+            "font": "Helvetica",
+            "size": "18",
+            "x":    "10",
+            "y":    "20",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Item A ........ $10",
+        Params: map[string]string{
+            "font": "Helvetica",
+            "size": "12",
+            "x":    "10",
+            "y":    "40",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Total: $10",
+        Params: map[string]string{
+            "font": "Helvetica-Bold",
+            "size": "14",
+            "x":    "10",
+            "y":    "60",
+        },
+    })
+
+    if err := tpl.RenderToFile("invoice.pdf"); err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+### Event ticket PDF
+
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/boomhut/pdf-gen"
+)
+
+func main() {
+    tpl := pdfgen.NewTemplate("ticket")
+    tpl.AddPage(100, 50)
+    tpl.AddLayer("content", pdfgen.SpdfMargin{})
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Concert 2024",
+        Params: map[string]string{
+            "font": "Helvetica",
+            "size": "14",
+            "x":    "10",
+            "y":    "10",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "qr",
+        Data: "TICKET-ABC123",
+        Params: map[string]string{
+            "x":     "60",
+            "y":     "10",
+            "scale": "100",
+        },
+    })
+
+    if err := tpl.RenderToFile("ticket.pdf"); err != nil {
+        log.Fatal(err)
+    }
+}
+```
