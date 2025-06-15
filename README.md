@@ -226,3 +226,192 @@ func main() {
     }
 }
 ```
+
+### Advanced ticket PDF with barcode
+
+```go
+package main
+
+import (
+    "image/png"
+    "log"
+    "os"
+
+    "github.com/boombuler/barcode"
+    "github.com/boombuler/barcode/code128"
+    "github.com/boomhut/pdf-gen"
+)
+
+func main() {
+    // generate Code128 barcode image
+    encoded, err := code128.Encode("EVENT-XYZ987654")
+    if err != nil {
+        log.Fatal(err)
+    }
+    code, err := barcode.Scale(encoded, 200, 60)
+    if err != nil {
+        log.Fatal(err)
+    }
+    f, err := os.Create("barcode.png")
+    if err != nil {
+        log.Fatal(err)
+    }
+    if err := png.Encode(f, code); err != nil {
+        log.Fatal(err)
+    }
+    if err := f.Close(); err != nil {
+        log.Fatal(err)
+    }
+
+    tpl := pdfgen.NewTemplate("adv-ticket")
+    tpl.AddPage(200, 100)
+    tpl.AddLayer("content", pdfgen.SpdfMargin{})
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Summer Festival 2024",
+        Params: map[string]string{
+            "font": "Helvetica-Bold",
+            "size": "20",
+            "x":    "10",
+            "y":    "15",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Sector A, Row 5, Seat 20",
+        Params: map[string]string{
+            "font": "Helvetica",
+            "size": "12",
+            "x":    "10",
+            "y":    "30",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "image",
+        Data: "barcode.png",
+        Params: map[string]string{
+            "x":     "10",
+            "y":     "50",
+            "scale": "100",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "qr",
+        Data: "ADV-TICKET-XYZ789",
+        Params: map[string]string{
+            "x":     "150",
+            "y":     "40",
+            "scale": "80",
+        },
+    })
+
+    if err := tpl.RenderToFile("advanced_ticket.pdf"); err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+### Ticket PDF with Code39 and EAN-13 barcodes
+
+```go
+package main
+
+import (
+    "image/png"
+    "log"
+    "os"
+
+    "github.com/boombuler/barcode"
+    "github.com/boombuler/barcode/code39"
+    "github.com/boombuler/barcode/ean"
+    "github.com/boomhut/pdf-gen"
+)
+
+func main() {
+    // create Code39 barcode
+    c39, err := code39.Encode("VIP12345", true, false)
+    if err != nil {
+        log.Fatal(err)
+    }
+    c39, err = barcode.Scale(c39, 180, 40)
+    if err != nil {
+        log.Fatal(err)
+    }
+    f1, err := os.Create("code39.png")
+    if err != nil {
+        log.Fatal(err)
+    }
+    if err := png.Encode(f1, c39); err != nil {
+        log.Fatal(err)
+    }
+    if err := f1.Close(); err != nil {
+        log.Fatal(err)
+    }
+
+    // create EAN-13 barcode
+    eanCode, err := ean.Encode("5901234123457")
+    if err != nil {
+        log.Fatal(err)
+    }
+    eanCode, err = barcode.Scale(eanCode, 180, 60)
+    if err != nil {
+        log.Fatal(err)
+    }
+    f2, err := os.Create("ean13.png")
+    if err != nil {
+        log.Fatal(err)
+    }
+    if err := png.Encode(f2, eanCode); err != nil {
+        log.Fatal(err)
+    }
+    if err := f2.Close(); err != nil {
+        log.Fatal(err)
+    }
+
+    tpl := pdfgen.NewTemplate("vip-ticket")
+    tpl.AddPage(210, 100)
+    tpl.AddLayer("content", pdfgen.SpdfMargin{})
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "VIP Access",
+        Params: map[string]string{
+            "font": "Helvetica-Bold",
+            "size": "22",
+            "x":    "10",
+            "y":    "15",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "text",
+        Data: "Gate 3 - Seat 15",
+        Params: map[string]string{
+            "font": "Helvetica",
+            "size": "12",
+            "x":    "10",
+            "y":    "30",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "image",
+        Data: "code39.png",
+        Params: map[string]string{
+            "x":     "10",
+            "y":     "50",
+            "scale": "90",
+        },
+    })
+    tpl.AddItem(pdfgen.SpdfItem{
+        Type: "image",
+        Data: "ean13.png",
+        Params: map[string]string{
+            "x":     "110",
+            "y":     "50",
+            "scale": "90",
+        },
+    })
+
+    if err := tpl.RenderToFile("vip_ticket.pdf"); err != nil {
+        log.Fatal(err)
+    }
+}
+```
