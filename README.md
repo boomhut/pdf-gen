@@ -270,10 +270,11 @@ func main() {
         Type: "text",
         Data: "Summer Festival 2024",
         Params: map[string]string{
-            "font": "Helvetica-Bold",
-            "size": "20",
-            "x":    "10",
-            "y":    "15",
+            "font":  "Helvetica",
+            "style": "B",
+            "size":  "20",
+            "x":     "10",
+            "y":     "15",
         },
     })
     tpl.AddItem(pdfgen.SpdfItem{
