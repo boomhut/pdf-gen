@@ -417,3 +417,30 @@ func main() {
     }
 }
 ```
+
+### Generate PDF from JSON template
+
+The library can also load a template definition from a JSON file. The
+`examples/advanced_ticket.json` file contains the same template used in the
+advanced ticket example above. Loading the JSON and generating the PDF is simple:
+
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/boomhut/pdf-gen"
+)
+
+func main() {
+    tpl, err := pdfgen.LoadTemplate("examples/advanced_ticket.json")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    if err := tpl.RenderToFile("advanced_ticket.pdf"); err != nil {
+        log.Fatal(err)
+    }
+}
+```

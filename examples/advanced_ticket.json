@@ -1,0 +1,56 @@
+{
+  "Name": "adv-ticket",
+  "Pages": [
+    {
+      "Width": 200,
+      "Height": 100,
+      "Layers": [
+        {
+          "Name": "content",
+          "Items": [
+            {
+              "Type": "text",
+              "Data": "Summer Festival 2024",
+              "Params": {
+                "font": "Helvetica",
+                "style": "B",
+                "size": "20",
+                "x": "10",
+                "y": "15"
+              }
+            },
+            {
+              "Type": "text",
+              "Data": "Sector A, Row 5, Seat 20",
+              "Params": {
+                "font": "Helvetica",
+                "size": "12",
+                "x": "10",
+                "y": "30"
+              }
+            },
+            {
+              "Type": "image",
+              "Data": "barcode.png",
+              "Params": {
+                "x": "10",
+                "y": "50",
+                "scale": "100"
+              }
+            },
+            {
+              "Type": "qr",
+              "Data": "ADV-TICKET-XYZ789",
+              "Params": {
+                "x": "150",
+                "y": "40",
+                "scale": "80"
+              }
+            }
+          ],
+          "Margin": {"Top":0,"Right":0,"Bottom":0,"Left":0}
+        }
+      ]
+    }
+  ]
+}
