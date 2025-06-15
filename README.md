@@ -375,10 +375,11 @@ func main() {
         Type: "text",
         Data: "VIP Access",
         Params: map[string]string{
-            "font": "Helvetica-Bold",
-            "size": "22",
-            "x":    "10",
-            "y":    "15",
+            "font":  "Helvetica",
+            "style": "B",
+            "size":  "22",
+            "x":     "10",
+            "y":     "15",
         },
     })
     tpl.AddItem(pdfgen.SpdfItem{
