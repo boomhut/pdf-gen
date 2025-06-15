@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/go-pdf/fpdf"
+	"github.com/go-pdf/fpdf/contrib/barcode"
 	"github.com/yeqown/go-qrcode/v2"
 	"github.com/yeqown/go-qrcode/writer/standard"
 )
@@ -634,6 +635,63 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 					)
 
 					// Reset rotation
+					if rotation != 0 {
+						pdf.TransformEnd()
+					}
+
+				} else if item.Type == "EAN13" || item.Type == "code128" || item.Type == "datamatrix" {
+					// Barcode generation using contrib/barcode
+
+					// Register barcode
+					var key string
+					switch item.Type {
+					case "EAN13":
+						key = barcode.RegisterEAN(pdf, item.Data)
+					case "code128":
+						key = barcode.RegisterCode128(pdf, item.Data)
+					case "datamatrix":
+						key = barcode.RegisterDataMatrix(pdf, item.Data)
+					}
+
+					// Get rotation
+					var rotation float64
+					if item.Params["rotate"] != "" {
+						rotate, err := strconv.ParseFloat(item.Params["rotate"], 64)
+						if err != nil {
+							return err
+						}
+						rotation = rotate
+					}
+
+					// Get position
+					x, err := strconv.ParseFloat(item.Params["x"], 64)
+					if err != nil {
+						return err
+					}
+					y, err := strconv.ParseFloat(item.Params["y"], 64)
+					if err != nil {
+						return err
+					}
+
+					var w, h float64
+					if item.Params["w"] != "" && item.Params["h"] != "" {
+						w, err = strconv.ParseFloat(item.Params["w"], 64)
+						if err != nil {
+							return err
+						}
+						h, err = strconv.ParseFloat(item.Params["h"], 64)
+						if err != nil {
+							return err
+						}
+					}
+
+					if rotation != 0 {
+						pdf.TransformBegin()
+						pdf.TransformRotate(rotation, x, y)
+					}
+
+					barcode.Barcode(pdf, key, x, y, w, h, false)
+
 					if rotation != 0 {
 						pdf.TransformEnd()
 					}

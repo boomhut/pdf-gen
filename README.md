@@ -10,7 +10,7 @@ go get github.com/boomhut/pdf-gen
 
 ## Quick start
 
-The package revolves around the `SpdfTemplate` type. A template is composed of pages, each page contains layers, and layers contain items. Items can be pieces of text, multiline text (`ftext`), images or QR codes.
+The package revolves around the `SpdfTemplate` type. A template is composed of pages, each page contains layers, and layers contain items. Items can be pieces of text, multiline text (`ftext`), images, QR codes, EAN-13, Code 128 or DataMatrix barcodes.
 
 ```go
 package main
