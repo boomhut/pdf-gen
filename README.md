@@ -329,11 +329,11 @@ import (
 
 func main() {
     // create Code39 barcode
-    c39, err := code39.Encode("VIP12345", true, false)
+    c39Data, err := code39.Encode("VIP12345", true, false)
     if err != nil {
         log.Fatal(err)
     }
-    c39, err = barcode.Scale(c39, 180, 40)
+    c39, err := barcode.Scale(c39Data, 180, 40)
     if err != nil {
         log.Fatal(err)
     }
@@ -349,11 +349,11 @@ func main() {
     }
 
     // create EAN-13 barcode
-    eanCode, err := ean.Encode("5901234123457")
+    eanData, err := ean.Encode("5901234123457")
     if err != nil {
         log.Fatal(err)
     }
-    eanCode, err = barcode.Scale(eanCode, 180, 60)
+    eanCode, err := barcode.Scale(eanData, 180, 60)
     if err != nil {
         log.Fatal(err)
     }
