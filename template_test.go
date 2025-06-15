@@ -1,8 +1,11 @@
 package pdfgen
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"image/color"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -201,4 +204,56 @@ func TestRenderToFileWithFonts(t *testing.T) {
 		t.Errorf("pdf file is empty")
 	}
 	t.Logf("demo PDF generated: %s", out)
+}
+
+func TestFontResourceTypeOpen(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "data.txt")
+	content := []byte("fontdata")
+	if err := os.WriteFile(file, content, 0o644); err != nil {
+		t.Fatalf("write temp file: %v", err)
+	}
+	rdr, err := (fontResourceType{}).Open(file)
+	if err != nil {
+		t.Fatalf("Open error: %v", err)
+	}
+	got, err := io.ReadAll(rdr)
+	if err != nil {
+		t.Fatalf("read data: %v", err)
+	}
+	if !bytes.Equal(got, content) {
+		t.Errorf("expected %q, got %q", content, got)
+	}
+	if _, err := (fontResourceType{}).Open(filepath.Join(dir, "missing")); err == nil {
+		t.Errorf("expected error on missing file")
+	}
+}
+
+func TestCreateQR(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "qr.png")
+	if err := CreateQR("hello", "", out, color.RGBA{0, 0, 0, 255}); err != nil {
+		t.Fatalf("CreateQR error: %v", err)
+	}
+	info, err := os.Stat(out)
+	if err != nil {
+		t.Fatalf("stat qr: %v", err)
+	}
+	if info.Size() == 0 {
+		t.Errorf("qr output is empty")
+	}
+}
+
+func TestLoadFontsMissingFontsJSON(t *testing.T) {
+	dir := t.TempDir()
+	pdf := fpdf.New("P", "mm", "A4", "")
+	if _, err := LoadFonts(pdf, dir, &SpdfTemplate{}); err == nil {
+		t.Errorf("expected error for missing fonts.json")
+	}
+}
+
+func TestLoadTemplateFromBytesInvalid(t *testing.T) {
+	if _, err := LoadTemplateFromBytes([]byte("{invalid")); err == nil {
+		t.Errorf("expected error on invalid json")
+	}
 }
