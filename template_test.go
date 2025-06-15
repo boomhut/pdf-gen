@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-pdf/fpdf"
+	"codeberg.org/go-pdf/fpdf"
 )
 
 func TestRenderPdfTitle(t *testing.T) {

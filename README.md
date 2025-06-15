@@ -1,6 +1,6 @@
 # pdf-gen
 
-pdf-gen is a small helper library built on top of [github.com/go-pdf/fpdf](https://github.com/go-pdf/fpdf). It allows building PDF documents using a declarative template structure. The package handles fonts and UTF-8 text so that accented characters such as `é` or `à` are rendered correctly.
+pdf-gen is a small helper library built on top of [codeberg.org/go-pdf/fpdf](https://codeberg.org/go-pdf/fpdf). It allows building PDF documents using a declarative template structure. The package handles fonts and UTF-8 text so that accented characters such as `é` or `à` are rendered correctly.
 
 ## Installation
 
