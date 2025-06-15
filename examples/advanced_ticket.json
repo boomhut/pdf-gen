@@ -30,16 +30,7 @@
               }
             },
             {
-              "Type": "image",
-              "Data": "barcode.png",
-              "Params": {
-                "x": "10",
-                "y": "50",
-                "scale": "100"
-              }
-            },
-            {
-              "Type": "qr",
+              "Type": "code128",
               "Data": "ADV-TICKET-XYZ789",
               "Params": {
                 "x": "150",
