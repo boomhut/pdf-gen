@@ -190,6 +190,11 @@ func TestRenderToFileWithFonts(t *testing.T) {
 	tpl.AddItem(SpdfItem{Type: "text", Data: "Ünicode", Params: map[string]string{"font": "Helvetica", "size": "14", "x": "10", "y": "20"}})
 	tpl.AddItem(SpdfItem{Type: "text", Data: "Čau", Params: map[string]string{"font": "Times", "size": "16", "x": "10", "y": "30"}})
 
+	// add barcode demo items
+	tpl.AddItem(SpdfItem{Type: "EAN13", Data: "5901234123457", Params: map[string]string{"x": "10", "y": "50", "w": "40", "h": "20"}})
+	tpl.AddItem(SpdfItem{Type: "code128", Data: "CODE128TEST", Params: map[string]string{"x": "60", "y": "50", "w": "40", "h": "20"}})
+	tpl.AddItem(SpdfItem{Type: "datamatrix", Data: "DM1234", Params: map[string]string{"x": "110", "y": "50", "w": "20", "h": "20"}})
+
 	// Write the output to a persistent file so it can be inspected after the
 	// tests run.
 	out := "demo.pdf"
@@ -255,5 +260,32 @@ func TestLoadFontsMissingFontsJSON(t *testing.T) {
 func TestLoadTemplateFromBytesInvalid(t *testing.T) {
 	if _, err := LoadTemplateFromBytes([]byte("{invalid")); err == nil {
 		t.Errorf("expected error on invalid json")
+	}
+}
+
+func TestListFontsInvalidJSON(t *testing.T) {
+	dir := t.TempDir()
+	// invalid JSON content
+	if err := os.WriteFile(filepath.Join(dir, "fonts.json"), []byte("{"), 0o644); err != nil {
+		t.Fatalf("write fonts.json: %v", err)
+	}
+	if _, err := ListFonts(dir); err == nil {
+		t.Errorf("expected error for invalid json")
+	}
+}
+
+func TestSaveTemplateError(t *testing.T) {
+	tpl := NewTemplate("err")
+	// path within non-existent directory
+	fname := filepath.Join(t.TempDir(), "missing", "file.json")
+	if err := SaveTemplate(tpl, fname); err == nil {
+		t.Errorf("expected error when saving to invalid path")
+	}
+}
+
+func TestLoadTemplateError(t *testing.T) {
+	// missing file should return error
+	if _, err := LoadTemplate(filepath.Join(t.TempDir(), "none.json")); err == nil {
+		t.Errorf("expected error for missing file")
 	}
 }
