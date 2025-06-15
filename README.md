@@ -230,39 +230,16 @@ func main() {
 ### Advanced ticket PDF with barcode
 
 ```go
+
 package main
 
 import (
-    "image/png"
     "log"
-    "os"
 
-    "github.com/boombuler/barcode"
-    "github.com/boombuler/barcode/code128"
     "github.com/boomhut/pdf-gen"
 )
 
 func main() {
-    // generate Code128 barcode image
-    encoded, err := code128.Encode("EVENT-XYZ987654")
-    if err != nil {
-        log.Fatal(err)
-    }
-    code, err := barcode.Scale(encoded, 200, 60)
-    if err != nil {
-        log.Fatal(err)
-    }
-    f, err := os.Create("barcode.png")
-    if err != nil {
-        log.Fatal(err)
-    }
-    if err := png.Encode(f, code); err != nil {
-        log.Fatal(err)
-    }
-    if err := f.Close(); err != nil {
-        log.Fatal(err)
-    }
-
     tpl := pdfgen.NewTemplate("adv-ticket")
     tpl.AddPage(200, 100)
     tpl.AddLayer("content", pdfgen.SpdfMargin{})
@@ -288,16 +265,7 @@ func main() {
         },
     })
     tpl.AddItem(pdfgen.SpdfItem{
-        Type: "image",
-        Data: "barcode.png",
-        Params: map[string]string{
-            "x":     "10",
-            "y":     "50",
-            "scale": "100",
-        },
-    })
-    tpl.AddItem(pdfgen.SpdfItem{
-        Type: "qr",
+        Type: "code128",
         Data: "ADV-TICKET-XYZ789",
         Params: map[string]string{
             "x":     "150",
