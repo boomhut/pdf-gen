@@ -193,7 +193,7 @@ func TestRenderToFileWithFonts(t *testing.T) {
 	// add barcode demo items
 	tpl.AddItem(SpdfItem{Type: "EAN13", Data: "5901234123457", Params: map[string]string{"x": "10", "y": "50", "w": "40", "h": "20"}})
 	tpl.AddItem(SpdfItem{Type: "code128", Data: "CODE128TEST", Params: map[string]string{"x": "60", "y": "50", "w": "40", "h": "20"}})
-	tpl.AddItem(SpdfItem{Type: "datamatrix", Data: "DM1234", Params: map[string]string{"x": "110", "y": "50", "w": "20", "h": "20"}})
+	tpl.AddItem(SpdfItem{Type: "datamatrix", Data: "DM123456789DF4", Params: map[string]string{"x": "110", "y": "50", "w": "20", "h": "20"}})
 
 	// Write the output to a persistent file so it can be inspected after the
 	// tests run.
