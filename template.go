@@ -125,8 +125,8 @@ func (tpl *SpdfTemplate) RenderToFile(filename string) error {
 	pdf.SetAuthor(tr(tpl.Author), true)
 
 	// creator and producer
-	pdf.SetCreator("smartest.software pdf renderer", true)
-	pdf.SetProducer("Logicos PDF", true)
+	pdf.SetCreator("Logicos Software PDF Renderer 6.2", true)
+	pdf.SetProducer("Logicos PDF 1.5", true)
 
 	// load fonts
 	pdf = MustReturnPtrFpdf(LoadFonts(pdf, "./resources/fonts", tpl))
