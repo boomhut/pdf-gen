@@ -1,6 +1,6 @@
 module github.com/boomhut/pdf-gen
 
-go 1.23.2
+go 1.26
 
 require (
 	codeberg.org/go-pdf/fpdf v0.11.1
@@ -15,5 +15,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/ruudk/golang-pdf417 v0.0.0-20201230142125-a7e3863a1245 // indirect
 	github.com/yeqown/reedsolomon v1.0.0 // indirect
-	golang.org/x/image v0.29.0 // indirect
+	golang.org/x/image v0.38.0 // indirect
 )
